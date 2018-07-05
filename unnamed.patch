@@ -1,0 +1,842 @@
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/misc.xml	(date 1530616091051)
++++ .idea/misc.xml	(date 1530616091051)
+@@ -0,0 +1,4 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.6 (PycharmProjects) (1)" project-jdk-type="Python SDK" />
++</project>
+\ No newline at end of file
+Index: .idea/modules.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/modules.xml	(date 1530614980184)
++++ .idea/modules.xml	(date 1530614980184)
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectModuleManager">
++    <modules>
++      <module fileurl="file://$PROJECT_DIR$/.idea/选课系统2.iml" filepath="$PROJECT_DIR$/.idea/选课系统2.iml" />
++    </modules>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/vcs.xml	(date 1530795966826)
++++ .idea/vcs.xml	(date 1530795966826)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="VcsDirectoryMappings">
++    <mapping directory="$PROJECT_DIR$" vcs="Git" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/选课系统2.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/选课系统2.iml	(date 1530616090975)
++++ .idea/选课系统2.iml	(date 1530616090975)
+@@ -0,0 +1,11 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module type="PYTHON_MODULE" version="4">
++  <component name="NewModuleRootManager">
++    <content url="file://$MODULE_DIR$" />
++    <orderEntry type="jdk" jdkName="Python 3.6 (PycharmProjects) (1)" jdkType="Python SDK" />
++    <orderEntry type="sourceFolder" forTests="false" />
++  </component>
++  <component name="TestRunnerService">
++    <option name="PROJECT_TEST_RUNNER" value="Unittests" />
++  </component>
++</module>
+\ No newline at end of file
+Index: conf/setting.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- conf/setting.py	(date 1530616744394)
++++ conf/setting.py	(date 1530616744394)
+@@ -0,0 +1,4 @@
++import os
++
++BASE_DIR = os.path.dirname(os.path.dirname(__file__))
++Base_DB = os.path.join(BASE_DIR,"db")
+\ No newline at end of file
+Index: core/admin.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- core/admin.py	(date 1530664552489)
++++ core/admin.py	(date 1530664552489)
+@@ -0,0 +1,107 @@
++from interface import student_interface,teacher_interface,admin_interface,common_interface
++from lib import common
++
++admin_info={
++    "name":None
++}
++
++def admin_register():
++    """管理员注册"""
++    while True:
++        name = input("请输入账号:").strip()
++        password =input("请输入密码:").strip()
++        conf_password = input("请确认密码:").strip()
++        if password == conf_password:
++            flg,msg=admin_interface.admin_register_interface(name, password)
++            if flg:
++                print(msg)
++                break
++            else:
++                print(msg)
++        else:
++            print("两次密码不一致")
++
++def admin_login():
++    """登入"""
++    while True:
++        name = input("请输入账号:").strip()
++        password =input("请输入密码:").strip()
++        flg,msg=common_interface.login_interface(name,password,"admin")
++        if flg:
++            admin_info["name"]=name
++            print(msg)
++            break
++        else:
++            print(msg)
++    
++@common.logn_auth(user_type="admin")
++def create_school():
++    """构建学校"""
++    school_name=input("请输入学校名字：").strip()
++    address=input("请输入地址").strip()
++    flg,msg=admin_interface.create_school_interface(admin_info["name"],school_name,address)
++    if flg:
++        print(msg)
++    else:
++        print(msg)
++    
++    
++@common.logn_auth(user_type="admin")
++def create_teacher():
++    """构建老师"""
++    teacher_name=input("请输入老师名字：").strip()
++    flg,msg=admin_interface.create_teacher_interface(admin_info["name"],teacher_name)
++    if flg:
++        print(msg)
++    else:
++        print(msg)
++@common.logn_auth(user_type="admin")
++def create_course():
++    """
++    创建课程
++    :return: 
++    """
++    school_list=common_interface.check_all_school()
++    if school_list:
++        for i,school in enumerate(school_list):
++            print("%s:%s" %(i,school))
++        choice = input("选择学校").strip()
++        if choice.isdigit():
++            choice=int(choice)
++            if choice < len(school_list):
++
++                course_name=input("请输入课程名字：").strip()
++                flg,msg=admin_interface.create_course_interface(admin_info["name"],course_name,school_list[choice])
++                if flg:
++                    print(msg)
++                else:
++                    print(msg)
++            else:
++                print("请选择正确的")
++        else:
++            print("输入数字")
++    else:
++        print("学校不存在")
++
++func_dic={
++    "1":admin_register,
++    "2":admin_login,
++    "3":create_school,
++    "4":create_teacher,
++    "5":create_course
++}
++
++def admin_view():
++    while True:
++        print("""
++        1  注册
++        2  登入
++        3  创建学校
++        4  创建老师
++        5  创建课程
++        """)
++        choice =input("请输入选择：").strip()
++        if choice == "q":break
++        elif not choice in func_dic:continue
++        func_dic[choice]()
++        
+\ No newline at end of file
+Index: core/src.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- core/src.py	(date 1530790599586)
++++ core/src.py	(date 1530790599586)
+@@ -0,0 +1,18 @@
++
++from core import admin,student,teacher
++
++func_dic={
++    '1':admin.admin_view,
++    '2':student.student_view,
++    '3':teacher.teacher_view
++}
++def run():
++    while True:
++        print('''
++        1 管理员视图
++        2 学生视图
++        3 老师视图
++        ''')
++        choice =input('请选择:').strip()
++        if  choice not in func_dic:continue
++        func_dic[choice]()
+\ No newline at end of file
+Index: core/student.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- core/student.py	(date 1530792461517)
++++ core/student.py	(date 1530792461517)
+@@ -0,0 +1,124 @@
++from interface import common_interface,student_interface
++from lib import common
++
++student_info={
++    "name":None
++}
++
++def student_register():
++    """
++    注册
++    :return:
++    """
++    while True:
++        name = input("请输入名字:").strip()
++        password = input("请输入密码").strip()
++        conf_password = input("请确认密码:").strip()
++        if password == conf_password:
++            flg,msg = student_interface.student_register_interface(name,password)
++            if flg:
++                print(msg)
++                break
++            else:
++                print(msg)
++        else:
++            print("两次密码不一致")
++
++
++def student_login():
++    """
++    登入
++    :return:
++    """
++    while True:
++        name = input("请输入名字").strip()
++        password = input("请输入密码").strip()
++        flg,msg=common_interface.login_interface(name,password,"student")
++        if flg:
++            print(msg)
++            student_info["name"]=name
++            break
++        else:
++            print(msg)
++
++
++@common.logn_auth("student")
++def choose_school():
++    """
++    选择学校
++    :return:
++    """
++    school_list=common_interface.check_all_school()
++    print(school_list)
++    if not school_list:
++        print("请联系管理员创建学校")
++        return 
++    for i,school in enumerate(school_list):
++        print("%s:%s" %(i,school))
++    choice = input("请选择学校").strip()
++    if choice.isdigit():
++        choice = int(choice)
++        if choice < len(school_list):
++            flg,msg=student_interface.choose_school_interface(student_info["name"],school_list[choice])
++            if flg:
++                print(msg)
++            else:
++                print(msg)
++        else:
++            print("选择请在范围内")
++    else:
++        print("请用数字选择学校")
++
++@common.logn_auth("student")
++def choose_course():
++    """
++    选择课程
++    :return:
++    """
++    flg,course_list = student_interface.get_can_choose_course_interface(student_info["name"])
++    if flg:
++        for i,course in enumerate(course_list):
++            print("%s:%s" %(i,course))
++        choice = input("请选择课程:").strip()
++        if choice.isdigit():
++            choice=int(choice)
++            if choice<len(course_list):
++                flg,msg=student_interface.choose_course_interface(student_info["name"],course_list[choice])
++                if flg:
++                    print(msg)
++                else:
++                    print(msg)
++            else:
++                print("请选择范围内的数字")
++        else:
++            print("请用数字选课程")
++    else:
++        print(course_list)
++
++@common.logn_auth("student")
++def check_score():
++    course_list=student_interface.look_course(student_info["name"])
++    print(course_list)
++
++func_dic = {
++    '1': student_register,
++    '2': student_login,
++    '3': choose_school,
++    '4': choose_course,
++    '5': check_score
++}
++
++
++def student_view():
++    while True:
++        print('''
++        1 注册
++        2 登陆
++        3 选择学校
++        4 选择课程
++        5 查看成绩
++        ''')
++        choice = input('请选择功能:').strip()
++        if choice == 'q': break
++        if choice not in func_dic: continue
++        func_dic[choice]()
+\ No newline at end of file
+Index: core/teacher.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- core/teacher.py	(date 1530790548578)
++++ core/teacher.py	(date 1530790548578)
+@@ -0,0 +1,141 @@
++from interface import teacher_interface,common_interface
++from lib import common
++teacher_info={
++    "name":None
++          }
++def teacher_login():
++    """登入"""
++    while True:
++        name = input("请输入名字").strip()
++        password = input('请输入密码：').strip()
++        flag, msg = common_interface.login_interface(name, password, 'teacher')
++        if flag:
++            print(msg)
++            teacher_info['name'] = name
++            break
++        else:
++            print(msg)
++
++@common.logn_auth('teacher')
++def choose_teach_cpirse():
++    """
++    选择要教授的课程
++    :return:
++    """
++    while True:
++        course_list=teacher_interface.get_all_course()
++        if not course_list:
++            print("课程不存在,请联系管理员创建课程")
++            break
++        else:
++            for i,course in enumerate(course_list):
++                print("%s:%s" %(i,course))
++            choice = input("请选择课程:").strip()
++            if choice.isdigit():
++                choice = int(choice)
++                if choice<len(course_list):
++                    flg,msg=teacher_interface.choose_teach_course_interface(teacher_info["name"],course_list[choice])
++                    if flg:
++                        print(msg)
++                        break
++                    else:
++                        print(msg)
++                else:
++                    print("必须输入数字")
++
++
++@common.logn_auth('teacher')
++def check_cpirse():
++    """
++    查看教授课程
++    :return:
++    """
++    course_list=teacher_interface.check_all_teacher_course(teacher_info["name"])
++    if course_list:
++        for course in course_list:
++            print(course)
++    else:
++        print("请先选择课程")
++
++@common.logn_auth('teacher')
++def check_student():
++    """
++    查看学生
++    :return:
++    """
++    course_list=teacher_interface.check_all_teacher_course(teacher_info["name"])
++    if course_list:
++        for i,course in enumerate(course_list):
++            print("%s:%s" %(i,course))
++        choice = input("请选择哪门课程下的学生:").strip()
++        if choice.isdigit():
++            choice=int(choice)
++            if choice<len(course_list):
++                student_list=teacher_interface.check_student_in_course(course_list[choice])
++                for i,student in enumerate(student_list):
++                    print("%s:%s" %(i,student))
++            else:
++                print('请选择存在的课程')
++        else:
++            print('请输入数字')
++    else:
++        print("请先选择课程")
++
++@common.logn_auth('teacher')
++def modify_score():
++    """
++    修改分数
++    :return:
++    """
++    course_list=teacher_interface.check_all_teacher_course(teacher_info["name"])
++    if course_list:
++        for i,course in enumerate(course_list):
++            print("%s:%s" %(i,course))
++        choice = input("请选择哪门课程下的学生:").strip()
++        if choice.isdigit():
++            choice=int(choice)
++            if choice<len(course_list):
++                student_list=teacher_interface.check_student_in_course(course_list[choice])
++                for i,student in enumerate(student_list):
++                    print("%s:%s" %(i,student))
++                choose = input("请选择学生").strip()
++                if choose.isdigit():
++                    choose=int(choose)
++                    if choose < len(student_list):
++                        score = input("请输入分数:").strip()
++                        if score.isdigit():
++                            score =int(score)
++                            msg=teacher_interface.modify_score(teacher_info["name"],course_list[choice],student_list[choose],score)
++                            print(msg)
++                        else:
++                            print('必须输入数字')
++                    else:
++                        print('必须选择存在的学生')
++            else:
++                print('请选择存在的课程')
++        else:
++            print('请输入数字')
++    else:
++        print("请先选择课程")
++
++
++func_dic={
++    "1":teacher_login,
++    "2":choose_teach_cpirse,
++    "3":check_cpirse,
++    "4":check_student,
++    "5":modify_score
++}
++def teacher_view():
++    while True:
++        print('''
++        1 登陆
++        2 选择课程
++        3 查看课程
++        4 查看学生
++        5 修改学生成绩
++        ''')
++        choice = input('请选择功能:').strip()
++        if choice == 'q': break
++        if choice not in func_dic: continue
++        func_dic[choice]()
+\ No newline at end of file
+Index: db/db_handler.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- db/db_handler.py	(date 1530791626715)
++++ db/db_handler.py	(date 1530791626715)
+@@ -0,0 +1,24 @@
++from conf import setting
++import os
++import pickle
++def save(obj):
++    """存储文件"""
++    path_dir = os.path.join(setting.Base_DB,obj.__class__.__name__.lower())
++    #拼接文档名为类的名字
++    if not os.path.exists(path_dir):#判断文档是否存在
++        os.mkdir(path_dir)#在没有的情况下创建文档
++    path_obj=os.path.join(path_dir,obj.name)#拼接文件写入名字
++    with open(path_obj,"wb") as f:
++        pickle.dump(obj,f)
++        f.flush()
++def select(name,dir_type):
++    path_dir=os.path.join(setting.Base_DB,dir_type)
++    #是读取哪一类的文档
++    if not os.path.exists(path_dir):
++        os.mkdir(path_dir)#在没有的情况下创建文档
++    path_obj=os.path.join(path_dir,name)#拼接文档下的文件名
++    if os.path.exists(path_obj):#判断文件是否存在
++        with open(path_obj,"rb") as f:
++            return pickle.load(f)
++    else:
++        return None
+Index: db/modles.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- db/modles.py	(date 1530793460598)
++++ db/modles.py	(date 1530793460598)
+@@ -0,0 +1,78 @@
++from db import db_handler
++class BaseClass:
++    def save(self):
++        """存储文件"""
++        db_handler.save(self)
++    @classmethod
++    def get_obj_by_name(cls,name):
++        """读取文件夹"""
++        return db_handler.select(name,cls.__name__.lower())
++
++class Admin(BaseClass):
++    """管理员类登记"""
++    def __init__(self,name,password):
++        self.name=name
++        self.password=password
++
++        self.save()
++    def create_school(self,school_name,addr):
++        School(school_name,addr)
++
++    def create_course(self,name):
++        Course(name)
++    def create_tercher(self,name,password):
++        Teacher(name,password)
++
++class Teacher(BaseClass):
++    """老师类登记"""
++    def __init__(self,name,password):
++        self.name=name
++        self.password=password
++        self.course_list=[]
++        self.save()
++    def add_course(self,course_name):
++        self.course_list.append(course_name)
++        self.save()
++    def modify_score(self,student,course_name,scores):
++        student.scores[course_name]=scores
++        student.save()
++
++class Student(BaseClass):
++    """学生类登记"""
++    def __init__(self, name, password):
++        self.name = name
++        self.password = password
++        self.school =None
++        self.course_list=[]
++        self.scores={}
++        self.save()
++    def get_school(self):
++        return self.school
++
++    def choose_school(self,name):
++        self.school=name
++        self.save()
++
++    def add_course(self,course_name):
++        self.course_list.append(course_name)
++        self.scores[course_name] = 0
++        self.save()
++        
++        
++class School(BaseClass):
++    def __init__(self,name,addr):
++        self.name =name
++        self.addr = addr
++        self.course_list=[]
++        self.save()
++    def add_course(self,course_name):
++        self.course_list.append(course_name)
++        self.save()
++class Course(BaseClass):
++    def __init__(self,name):
++        self.name =name
++        self.studen_list=[]
++        self.save()
++    def student_list(self,name):
++        self.studen_list.append(name)
++        self.save()
+\ No newline at end of file
+Index: interface/admin_interface.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- interface/admin_interface.py	(date 1530792523475)
++++ interface/admin_interface.py	(date 1530792523475)
+@@ -0,0 +1,36 @@
++from db import modles
++
++def admin_register_interface(name,password):
++    """管理员注册"""
++    damin_obj=modles.Admin.get_obj_by_name(name) #读取管理员文档是否有管理员名字
++    if damin_obj:
++        return False,"账户已存在"
++    else:
++        modles.Admin(name,password)
++        return True,"注册成功"
++
++def create_school_interface(admin_name,school_name,addr):
++    school_obj = modles.School.get_obj_by_name(school_name)
++    if school_obj:
++        return False,"学校已经存在"
++    admin_obj=modles.Admin.get_obj_by_name(admin_name)
++    admin_obj.create_school(school_name,addr)
++    return True,"学校创建成功"
++
++def create_teacher_interface(admin_name,teacher_name,password="456"):
++    teacher_obj = modles.Teacher.get_obj_by_name(teacher_name)
++    if teacher_obj:
++        return False,"老师已经存在"
++    admin_obj=modles.Admin.get_obj_by_name(admin_name)
++    admin_obj.create_tercher(teacher_name,password)
++    return True,"老师创建成功"
++
++def create_course_interface(admin_name,course_name,school_name):
++    course_obj = modles.Course.get_obj_by_name(course_name)
++    if course_obj:
++        return False,"课程已经存在"
++    admin_obj=modles.Admin.get_obj_by_name(admin_name)
++    admin_obj.create_course(course_name)
++    school_obj=modles.School.get_obj_by_name(school_name)
++    school_obj.add_course(course_name)
++    return True,"课程创建成功"
+Index: interface/common_interface.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- interface/common_interface.py	(date 1530664659460)
++++ interface/common_interface.py	(date 1530664659460)
+@@ -0,0 +1,24 @@
++from db import modles
++import os
++from conf import setting
++from lib import common
++def login_interface(name,password,user_type):
++    if user_type == "admin":
++        obj=modles.Admin.get_obj_by_name(name)
++    elif user_type == "student":
++        obj=modles.Student.get_obj_by_name(name)
++    elif user_type == "teacher":
++        obj=modles.Teacher.get_obj_by_name(name)
++    else:
++        return False,"不存在此类"
++    if obj:
++        if obj.password == password:
++            return True,"%s:%s 登入成功" %(user_type,name)
++        else:
++            return False,"密码错误"
++    else:
++        return False,"账号不存在"
++
++def check_all_school():
++    path = os.path.join(setting.Base_DB,"school")
++    return common.get_all_dir_obj(path)
+\ No newline at end of file
+Index: interface/student_interface.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- interface/student_interface.py	(date 1530793795100)
++++ interface/student_interface.py	(date 1530793795100)
+@@ -0,0 +1,46 @@
++from db import modles
++
++def student_register_interface(name,password):
++    student_obj = modles.Student.get_obj_by_name(name)
++    if student_obj:
++        return False,"学生已经存在"
++    else:
++        modles.Student(name,password)
++        return True,"注册成功"
++
++def choose_school_interface(student_name,school_name):
++    student_obj = modles.Student.get_obj_by_name(student_name)
++    print(student_obj)
++    school = student_obj.get_school()
++    if not school:
++
++        student_obj.choose_school(school_name)
++
++        return True,'选择学校成功'
++    else:
++        return False,'您已经选择学校了'
++
++def get_can_choose_course_interface(student_name):
++    obj=modles.Student.get_obj_by_name(student_name)
++    if not obj.school:
++        return False,"您还没有选择学校,请先选择学校"
++    school_obj=modles.School.get_obj_by_name(obj.school)
++    if school_obj.course_list:
++        return True,school_obj.course_list
++    else:
++        return False,"该学校下没有课程"
++
++def choose_course_interface(student_name,course_name):
++    obj=modles.Student.get_obj_by_name(student_name)
++    if course_name in obj.course_list:
++        return False,"课程之前已经选过"
++    obj.add_course(course_name)
++    course_obj=modles.Course.get_obj_by_name(course_name)
++
++    course_obj.student_list(student_name)
++    return True,"选课成功"
++
++def look_course(student_name):
++    obj=modles.Student.get_obj_by_name(student_name)
++    return obj.scores
++
+Index: interface/teacher_interface.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- interface/teacher_interface.py	(date 1530792962439)
++++ interface/teacher_interface.py	(date 1530792962439)
+@@ -0,0 +1,27 @@
++import os
++from lib import common
++from conf import setting
++from db import modles
++def get_all_course():
++    path = os.path.join(setting.Base_DB,"course")
++    return common.get_all_dir_obj(path)
++
++def choose_teach_course_interface(teacher_name,course_name):
++    teacher_obj=modles.Teacher.get_obj_by_name(teacher_name)
++    if course_name in teacher_obj.course_list:
++        return False,"课程已存在请勿重复提交"
++    teacher_obj.add_course(course_name)
++    return True,"课程选择成功"
++
++def check_all_teacher_course(teacher_name):
++    obj=modles.Teacher.get_obj_by_name(teacher_name)
++    return obj.course_list
++    
++def check_student_in_course(course):
++    course_obj=modles.Course.get_obj_by_name(course)
++    return course_obj.student_list
++    
++def modify_score(teacher_name,course_name,student_name,score):
++    teacher_obj=modles.Teacher.get_obj_by_name(teacher_name)
++    score_obj=teacher_obj.modify_score(student_name,course_name,score)
++    return "打分完毕"
+\ No newline at end of file
+Index: lib/common.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- lib/common.py	(date 1530624480710)
++++ lib/common.py	(date 1530624480710)
+@@ -0,0 +1,27 @@
++import os
++
++def logn_auth(user_type):
++    from core import admin,student,teacher
++    def atut(func):
++        def wrapper(*args,**kwargs):
++            if user_type == "admin":
++                if not admin.admin_info["name"]:
++                    admin.admin_login()
++                return func(*args,**kwargs)
++            elif user_type == "student":
++                if not student.student_info["name"]:
++                    student.student_login()
++                return func(*args,**kwargs)
++            elif user_type == "teacher":
++                if not teacher.teacher_info["name"]:
++                    teacher.teacher_login()
++                return func(*args,**kwargs)
++        return wrapper
++    return atut
++
++def get_all_dir_obj(path):
++    if os.path.exists(path):
++        obj_list=os.listdir(path)
++        return obj_list
++    else:
++        return None
+\ No newline at end of file
+Index: start.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- start.py	(date 1530663371257)
++++ start.py	(date 1530663371257)
+@@ -0,0 +1,7 @@
++import os
++import sys
++path_abs=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++sys.path.append(path_abs)
++from core import src
++if __name__ == '__main__':
++    src.run()
+\ No newline at end of file
